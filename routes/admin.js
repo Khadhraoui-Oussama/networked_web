@@ -13,9 +13,23 @@ router.get('/', ensureAdmin, async (req, res) => {
         const jobCount = await Job.countDocuments({ isActive: true });
         const bannedCount = await User.countDocuments({ isBanned: true });
 
+        // Fetch recent users for the dashboard
+        const recentUsers = await User.find()
+            .select('firstName lastName email photo role createdAt')
+            .sort({ createdAt: -1 })
+            .limit(5);
+
+        // Fetch recent posts for the dashboard
+        const recentPosts = await Post.find({ isDeleted: false })
+            .populate('author', 'firstName lastName photo')
+            .sort({ createdAt: -1 })
+            .limit(5);
+
         res.render('admin/dashboard', {
             title: 'Admin Dashboard',
-            stats: { userCount, postCount, jobCount, bannedCount }
+            stats: { userCount, postCount, jobCount, bannedCount },
+            recentUsers,
+            recentPosts
         });
     } catch (err) {
         console.error(err);
@@ -50,7 +64,8 @@ router.get('/users', ensureAdmin, async (req, res) => {
             users,
             search,
             role,
-            status
+            status,
+            filter: role
         });
     } catch (err) {
         console.error(err);
@@ -136,14 +151,25 @@ router.delete('/users/:id', ensureAdmin, async (req, res) => {
 
 router.get('/posts', ensureAdmin, async (req, res) => {
     try {
-        const posts = await Post.find({ isDeleted: false })
+        const { search, sort = 'newest' } = req.query;
+        
+        let query = { isDeleted: false };
+        if (search) {
+            query.content = { $regex: search, $options: 'i' };
+        }
+
+        let sortOption = { createdAt: -1 };
+        if (sort === 'oldest') sortOption = { createdAt: 1 };
+        if (sort === 'reported') sortOption = { reportCount: -1, createdAt: -1 };
+
+        const posts = await Post.find(query)
             .populate('author', 'firstName lastName photo')
             .populate('comments.user', 'firstName lastName photo')
             .populate('reactions.user', 'firstName lastName photo')
-            .sort({ createdAt: -1 })
+            .sort(sortOption)
             .limit(100);
 
-        res.render('admin/posts', { title: 'Manage Posts', posts });
+        res.render('admin/posts', { title: 'Manage Posts', posts, search, sort });
     } catch (err) {
         console.error(err);
         req.flash('error_msg', 'Error loading posts');
