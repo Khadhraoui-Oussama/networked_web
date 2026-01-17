@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> | NetWorked</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light" data-user-id="<%= user ? user._id : '' %>">
+    <%- include('../partials/navbar') %>
+    
+    <main class="container py-4">
+        <%- include('../partials/messages') %>
+        
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="mb-0">Connections</h4>
+                    <a href="/network" class="btn btn-outline-primary">
+                        <i class="bi bi-search"></i> Find People
+                    </a>
+                </div>
+                
+                <% if (pendingConnections && pendingConnections.length > 0) { %>
+                    <div class="card mb-4">
+                        <div class="card-header bg-warning bg-opacity-25">
+                            <h5 class="mb-0">
+                                <i class="bi bi-clock"></i> Pending Requests
+                                <span class="badge bg-warning text-dark"><%= pendingConnections.length %></span>
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <% pendingConnections.forEach(function(person) { %>
+                                <div class="d-flex align-items-center justify-content-between py-2 border-bottom">
+                                    <div class="d-flex align-items-center">
+                                        <img src="<%= person.photo %>" alt="<%= person.firstName %>" 
+                                             class="rounded-circle me-3" width="50" height="50" style="object-fit: cover;">
+                                        <div>
+                                            <a href="/profile/<%= person._id %>" class="text-decoration-none fw-bold">
+                                                <% if (person.role === 'company') { %>
+                                                    <%= person.companyName %>
+                                                <% } else { %>
+                                                    <%= person.firstName %> <%= person.lastName %>
+                                                <% } %>
+                                            </a>
+                                            <p class="text-muted small mb-0"><%= person.headline || '' %></p>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <form action="/network/accept/<%= person._id %>" method="POST" class="d-inline">
+                                            <button type="submit" class="btn btn-primary btn-sm">Accept</button>
+                                        </form>
+                                        <form action="/network/reject/<%= person._id %>" method="POST" class="d-inline">
+                                            <button type="submit" class="btn btn-outline-secondary btn-sm">Ignore</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        </div>
+                    </div>
+                <% } %>
+                
+                <div class="card">
+                    <div class="card-header bg-transparent">
+                        <h5 class="mb-0">
+                            My Connections
+                            <span class="badge bg-primary"><%= connections ? connections.length : 0 %></span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <% if (connections && connections.length > 0) { %>
+                            <% connections.forEach(function(person) { %>
+                                <div class="d-flex align-items-center justify-content-between py-3 border-bottom">
+                                    <div class="d-flex align-items-center">
+                                        <img src="<%= person.photo %>" alt="<%= person.firstName %>" 
+                                             class="rounded-circle me-3" width="60" height="60" style="object-fit: cover;">
+                                        <div>
+                                            <a href="/profile/<%= person._id %>" class="text-decoration-none fw-bold">
+                                                <% if (person.role === 'company') { %>
+                                                    <%= person.companyName %>
+                                                <% } else { %>
+                                                    <%= person.firstName %> <%= person.lastName %>
+                                                <% } %>
+                                            </a>
+                                            <p class="text-muted small mb-0"><%= person.headline || '' %></p>
+                                        </div>
+                                    </div>
+                                    <div class="btn-group">
+                                        <form action="/messages/start/<%= person._id %>" method="POST">
+                                            <button type="submit" class="btn btn-outline-primary btn-sm">
+                                                <i class="bi bi-chat"></i> Message
+                                            </button>
+                                        </form>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm dropdown-toggle dropdown-toggle-split" 
+                                                data-bs-toggle="dropdown">
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-end">
+                                            <li>
+                                                <a class="dropdown-item" href="/profile/<%= person._id %>">View Profile</a>
+                                            </li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li>
+                                                <form action="/network/disconnect/<%= person._id %>" method="POST">
+                                                    <button type="submit" class="dropdown-item text-danger" 
+                                                            onclick="return confirm('Remove this connection?')">
+                                                        Remove Connection
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        <% } else { %>
+                            <div class="text-center py-5">
+                                <i class="bi bi-people display-4 text-muted mb-3"></i>
+                                <h5>No connections yet</h5>
+                                <p class="text-muted">Start building your professional network.</p>
+                                <a href="/network" class="btn btn-primary">Find People</a>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <%- include('../partials/footer') %>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+</html>

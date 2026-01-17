@@ -1,0 +1,115 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary sticky-top">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="<%= user ? '/' : '/welcome' %>">
+            <i class="bi bi-globe2"></i> NetWorked
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <% if (user) { %>
+                <form class="d-flex mx-auto" action="/network" method="GET" style="max-width: 400px; width: 100%;">
+                    <div class="input-group">
+                        <input type="text" class="form-control" name="search" placeholder="Search people, skills...">
+                        <button class="btn btn-light" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </form>
+                
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="bi bi-house-door"></i>
+                            <span class="d-lg-none d-xl-inline ms-1">Home</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" href="/network">
+                            <i class="bi bi-people"></i>
+                            <span class="d-lg-none d-xl-inline ms-1">Network</span>
+                            <% if (pendingConnections > 0) { %>
+                                <span class="badge bg-danger rounded-pill position-absolute" style="top: 0; right: 0; font-size: 0.65rem;"><%= pendingConnections %></span>
+                            <% } %>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" href="/jobs">
+                            <i class="bi bi-briefcase"></i>
+                            <span class="d-lg-none d-xl-inline ms-1">Jobs</span>
+                            <% if (pendingJobApplications > 0) { %>
+                                <span class="badge bg-danger rounded-pill position-absolute" style="top: 0; right: 0; font-size: 0.65rem;"><%= pendingJobApplications %></span>
+                            <% } %>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" href="/messages">
+                            <i class="bi bi-chat-dots"></i>
+                            <span class="d-lg-none d-xl-inline ms-1">Messages</span>
+                            <% if (unreadMessages > 0) { %>
+                                <span class="badge bg-danger rounded-pill position-absolute" style="top: 0; right: 0; font-size: 0.65rem;"><%= unreadMessages %></span>
+                            <% } %>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link position-relative" href="/notifications">
+                            <i class="bi bi-bell"></i>
+                            <span class="d-lg-none d-xl-inline ms-1">Notifications</span>
+                            <span id="notificationBadge" class="notification-badge badge bg-danger rounded-pill position-absolute <%= unreadNotifications > 0 ? '' : 'd-none' %>"><%= unreadNotifications > 0 ? unreadNotifications : '' %></span>
+                        </a>
+                    </li>
+                    
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                            <img src="<%= user.photo %>" alt="Profile" class="rounded-circle" width="28" height="28" style="object-fit: cover;">
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li>
+                                <a class="dropdown-item" href="/profile">
+                                    <i class="bi bi-person me-2"></i>My Profile
+                                </a>
+                            </li>
+                            <li>
+                                <a class="dropdown-item" href="/profile/edit">
+                                    <i class="bi bi-gear me-2"></i>Settings
+                                </a>
+                            </li>
+                            <% if (user.role === 'company') { %>
+                                <li>
+                                    <a class="dropdown-item" href="/jobs/my-jobs">
+                                        <i class="bi bi-briefcase me-2"></i>My Jobs
+                                    </a>
+                                </li>
+                            <% } %>
+                            <% if (user.role === 'admin') { %>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item text-primary" href="/admin">
+                                        <i class="bi bi-shield-lock me-2"></i>Admin Panel
+                                    </a>
+                                </li>
+                            <% } %>
+                            <li><hr class="dropdown-divider"></li>
+                            <li>
+                                <a class="dropdown-item text-danger" href="/auth/logout">
+                                    <i class="bi bi-box-arrow-right me-2"></i>Logout
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            <% } else { %>
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/auth/login">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-outline-light ms-2" href="/auth/register">Join Now</a>
+                    </li>
+                </ul>
+            <% } %>
+        </div>
+    </div>
+</nav>

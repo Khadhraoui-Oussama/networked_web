@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> | NetWorked Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <%- include('../partials/navbar') %>
+    
+    <main class="container py-4">
+        <%- include('../partials/messages') %>
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3>Manage Posts</h3>
+            <a href="/admin" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-body">
+                <form action="/admin/posts" method="GET" class="row g-3">
+                    <div class="col-md-8">
+                        <input type="text" class="form-control" name="search" 
+                               value="<%= typeof search !== 'undefined' ? search : '' %>" 
+                               placeholder="Search posts...">
+                    </div>
+                    <div class="col-md-2">
+                        <select class="form-select" name="sort">
+                            <option value="newest" <%= sort === 'newest' ? 'selected' : '' %>>Newest</option>
+                            <option value="oldest" <%= sort === 'oldest' ? 'selected' : '' %>>Oldest</option>
+                            <option value="reported" <%= sort === 'reported' ? 'selected' : '' %>>Most Reported</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-primary w-100">Search</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <% if (posts && posts.length > 0) { %>
+            <% posts.forEach(function(post) { %>
+                <div class="card mb-3">
+                    <div class="card-header bg-transparent">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center">
+                                <img src="<%= post.author.photo %>" alt="<%= post.author.firstName %>" 
+                                     class="rounded-circle me-3" width="40" height="40" style="object-fit: cover;">
+                                <div>
+                                    <h6 class="mb-0">
+                                        <%= post.author.firstName %> <%= post.author.lastName %>
+                                    </h6>
+                                    <small class="text-muted">
+                                        <%= new Date(post.createdAt).toLocaleDateString('en-US', {
+                                            month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                                        }) %>
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="btn-group">
+                                <a href="/profile/<%= post.author._id %>" class="btn btn-sm btn-outline-primary">
+                                    View Author
+                                </a>
+                                <form action="/admin/posts/<%= post._id %>/delete" method="POST" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                                            onclick="return confirm('Delete this post?')">
+                                        <i class="bi bi-trash"></i> Delete Post
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-3"><%= post.content %></p>
+                        
+                        <% if (post.media && post.media.length > 0) { %>
+                            <div class="row mb-3">
+                                <% post.media.forEach(function(m) { %>
+                                    <div class="col-md-4 mb-2">
+                                        <% if (m.type === 'image') { %>
+                                            <img src="<%= m.url %>" alt="Post media" class="img-fluid rounded">
+                                        <% } else if (m.type === 'video') { %>
+                                            <video src="<%= m.url %>" controls class="img-fluid rounded"></video>
+                                        <% } %>
+                                    </div>
+                                <% }); %>
+                            </div>
+                        <% } %>
+                        
+                        <div class="d-flex gap-3 text-muted small">
+                            <span><i class="bi bi-hand-thumbs-up"></i> <%= post.reactions.length %> reactions</span>
+                            <span><i class="bi bi-chat"></i> <%= post.comments.length %> comments</span>
+                        </div>
+                    </div>
+                    
+                    <% if (post.comments && post.comments.length > 0) { %>
+                        <div class="card-footer bg-transparent">
+                            <h6 class="mb-3">Comments (<%= post.comments.length %>)</h6>
+                            <% post.comments.forEach(function(comment) { %>
+                                <div class="d-flex mb-2 pb-2 border-bottom">
+                                    <img src="<%= comment.user.photo %>" alt="<%= comment.user.firstName %>" 
+                                         class="rounded-circle me-2" width="32" height="32" style="object-fit: cover;">
+                                    <div class="flex-grow-1">
+                                        <div class="d-flex justify-content-between">
+                                            <strong class="small"><%= comment.user.firstName %> <%= comment.user.lastName %></strong>
+                                            <form action="/admin/posts/<%= post._id %>/comments/<%= comment._id %>/delete" method="POST">
+                                                <button type="submit" class="btn btn-link btn-sm text-danger p-0"
+                                                        onclick="return confirm('Delete this comment?')">
+                                                    <i class="bi bi-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                        <p class="mb-0 small"><%= comment.content %></p>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        </div>
+                    <% } %>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-file-post display-4 text-muted mb-3"></i>
+                    <h5>No posts found</h5>
+                </div>
+            </div>
+        <% } %>
+    </main>
+    
+    <%- include('../partials/footer') %>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,165 @@
+<article class="card mb-3 post-card">
+    <div class="card-body">
+        <div class="d-flex align-items-start mb-3">
+            <a href="/profile/<%= post.author._id %>">
+                <img src="<%= post.author.photo %>" alt="<%= post.author.firstName %>" 
+                     class="rounded-circle me-3" width="48" height="48" style="object-fit: cover;">
+            </a>
+            <div class="flex-grow-1">
+                <h6 class="mb-0">
+                    <a href="/profile/<%= post.author._id %>" class="text-decoration-none text-dark">
+                        <% if (post.author.role === 'company') { %>
+                            <%= post.author.companyName %>
+                        <% } else { %>
+                            <%= post.author.firstName %> <%= post.author.lastName %>
+                        <% } %>
+                    </a>
+                </h6>
+                <small class="text-muted">
+                    <%= post.author.headline || '' %>
+                </small>
+                <br>
+                <small class="text-muted">
+                    <%= new Date(post.createdAt).toLocaleDateString('en-US', { 
+                        month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit'
+                    }) %>
+                </small>
+            </div>
+            <% if (user && (post.author._id.toString() === user._id.toString() || user.role === 'admin')) { %>
+                <div class="dropdown">
+                    <button class="btn btn-link text-muted" type="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-three-dots"></i>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <form action="/posts/<%= post._id %>?_method=DELETE" method="POST">
+                                <button type="submit" class="dropdown-item text-danger">
+                                    <i class="bi bi-trash me-2"></i>Delete
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            <% } %>
+        </div>
+        
+        <p class="card-text"><%= post.content %></p>
+        
+        <% if (post.media) { %>
+            <div class="mb-3">
+                <% if (post.mediaType === 'image') { %>
+                    <img src="<%= post.media %>" alt="Post image" class="img-fluid rounded" style="max-height: 400px;">
+                <% } else if (post.mediaType === 'video') { %>
+                    <video controls class="w-100 rounded" style="max-height: 400px;">
+                        <source src="<%= post.media %>" type="video/mp4">
+                    </video>
+                <% } %>
+            </div>
+        <% } %>
+        
+        <div class="d-flex justify-content-between text-muted small border-top border-bottom py-2 mb-2">
+            <span class="reactions-display">
+                <% if (post.reactions && post.reactions.length > 0) { %>
+                    <i class="bi bi-hand-thumbs-up-fill text-primary"></i>
+                    <span class="likers-text">
+                        <% 
+                            const likerNames = post.reactions.slice(0, 3).map(r => {
+                                if (r.user && r.user.firstName) {
+                                    return r.user.firstName + ' ' + r.user.lastName;
+                                }
+                                return 'Someone';
+                            });
+                            if (post.reactions.length <= 3) { 
+                        %>
+                            <%= likerNames.join(', ') %>
+                        <% } else { %>
+                            <%= likerNames.slice(0, 2).join(', ') %> and <%= post.reactions.length - 2 %> others
+                        <% } %>
+                    </span>
+                <% } %>
+            </span>
+            <span>
+                <% if (post.comments && post.comments.filter(c => !c.isDeleted).length > 0) { %>
+                    <%= post.comments.filter(c => !c.isDeleted).length %> comments
+                <% } %>
+            </span>
+        </div>
+        
+        <div class="d-flex justify-content-around mb-3">
+            <button class="btn btn-light btn-sm flex-grow-1 me-1 react-btn" 
+                    data-post-id="<%= post._id %>" data-reaction="like">
+                <% 
+                    const userReaction = post.reactions && post.reactions.find(r => 
+                        user && r.user && r.user.toString() === user._id.toString()
+                    );
+                %>
+                <i class="bi bi-hand-thumbs-up<%= userReaction ? '-fill text-primary' : '' %>"></i>
+                Like
+            </button>
+            <button class="btn btn-light btn-sm flex-grow-1 mx-1" 
+                    data-bs-toggle="collapse" data-bs-target="#comments-<%= post._id %>">
+                <i class="bi bi-chat"></i> Comment
+            </button>
+        </div>
+        
+        <div class="collapse" id="comments-<%= post._id %>">
+            <div class="border-top pt-3">
+                <form action="/posts/<%= post._id %>/comment" method="POST" enctype="multipart/form-data" class="mb-3">
+                    <div class="d-flex">
+                        <img src="<%= user.photo %>" alt="You" class="rounded-circle me-2" 
+                             width="32" height="32" style="object-fit: cover;">
+                        <div class="flex-grow-1">
+                            <input type="text" name="content" class="form-control form-control-sm" 
+                                   placeholder="Write a comment..." required>
+                            <div class="mt-2 d-flex justify-content-between align-items-center">
+                                <input type="file" name="postMedia" class="form-control form-control-sm" 
+                                       style="max-width: 200px;" accept="image/*,video/*">
+                                <button type="submit" class="btn btn-primary btn-sm">Post</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                
+                <% if (post.comments && post.comments.length > 0) { %>
+                    <% post.comments.filter(c => !c.isDeleted).forEach(function(comment) { %>
+                        <div class="d-flex mb-2">
+                            <img src="<%= comment.user.photo %>" alt="<%= comment.user.firstName %>" 
+                                 class="rounded-circle me-2" width="32" height="32" style="object-fit: cover;">
+                            <div class="bg-light rounded p-2 flex-grow-1">
+                                <div class="d-flex justify-content-between">
+                                    <strong class="small">
+                                        <%= comment.user.firstName %> <%= comment.user.lastName %>
+                                    </strong>
+                                    <% if (user && (comment.user._id.toString() === user._id.toString() || 
+                                                    post.author._id.toString() === user._id.toString() || 
+                                                    user.role === 'admin')) { %>
+                                        <form action="/posts/<%= post._id %>/comment/<%= comment._id %>?_method=DELETE" 
+                                              method="POST" class="d-inline">
+                                            <button type="submit" class="btn btn-link btn-sm text-danger p-0">
+                                                <i class="bi bi-x"></i>
+                                            </button>
+                                        </form>
+                                    <% } %>
+                                </div>
+                                <p class="mb-1 small"><%= comment.content %></p>
+                                <% if (comment.media) { %>
+                                    <% if (comment.mediaType === 'image') { %>
+                                        <img src="<%= comment.media %>" alt="Comment image" 
+                                             class="img-fluid rounded" style="max-height: 150px;">
+                                    <% } else if (comment.mediaType === 'video') { %>
+                                        <video controls class="w-100 rounded" style="max-height: 150px;">
+                                            <source src="<%= comment.media %>" type="video/mp4">
+                                        </video>
+                                    <% } %>
+                                <% } %>
+                                <small class="text-muted">
+                                    <%= new Date(comment.createdAt).toLocaleDateString() %>
+                                </small>
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</article>

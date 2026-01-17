@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> | NetWorked</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light" data-user-id="<%= user._id %>">
+    <%- include('../partials/navbar') %>
+    
+    <main class="container py-4">
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card">
+                    <div class="card-header bg-transparent">
+                        <div class="d-flex align-items-center">
+                            <a href="/messages" class="btn btn-link text-muted me-2 d-lg-none">
+                                <i class="bi bi-arrow-left"></i>
+                            </a>
+                            <img src="<%= otherParticipant.photo %>" alt="<%= otherParticipant.firstName %>" 
+                                 class="rounded-circle me-3" width="40" height="40" style="object-fit: cover;">
+                            <div>
+                                <h6 class="mb-0">
+                                    <a href="/profile/<%= otherParticipant._id %>" class="text-decoration-none">
+                                        <% if (otherParticipant.role === 'company') { %>
+                                            <%= otherParticipant.companyName %>
+                                        <% } else { %>
+                                            <%= otherParticipant.firstName %> <%= otherParticipant.lastName %>
+                                        <% } %>
+                                    </a>
+                                </h6>
+                                <% if (conversation.job) { %>
+                                    <small class="text-muted">Re: <%= conversation.job.title %></small>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card-body p-0">
+                        <div class="messages-container p-3" id="messagesContainer" style="height: 400px; overflow-y: auto; background-color: #f8f9fa;">
+                            <% if (messages && messages.length > 0) { %>
+                                <% messages.forEach(function(msg) { 
+                                    const isOwn = msg.sender._id.toString() === user._id.toString();
+                                %>
+                                    <div class="d-flex mb-3 <%= isOwn ? 'justify-content-end' : 'justify-content-start' %>" style="align-items: flex-end;">
+                                        <% if (!isOwn) { %>
+                                            <img src="<%= msg.sender.photo %>" alt="<%= msg.sender.firstName %>" 
+                                                 class="rounded-circle me-2 flex-shrink-0" width="32" height="32" style="object-fit: cover;">
+                                        <% } %>
+                                        <div class="<%= isOwn ? 'sent-message' : 'received-message' %> rounded-3 p-2" 
+                                             style="max-width: 70%;">
+                                            <p class="mb-1" style="white-space: pre-wrap; word-wrap: break-word;"><%= msg.content %></p>
+                                            <small class="<%= isOwn ? 'text-white-50' : 'text-muted' %>" style="font-size: 0.75rem;">
+                                                <%= new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
+                                            </small>
+                                        </div>
+                                        <% if (isOwn) { %>
+                                            <img src="<%= msg.sender.photo %>" alt="You" 
+                                                 class="rounded-circle ms-2 flex-shrink-0" width="32" height="32" style="object-fit: cover;">
+                                        <% } %>
+                                    </div>
+                                <% }); %>
+                            <% } else { %>
+                                <div class="text-center text-muted py-5">
+                                    <i class="bi bi-chat-dots display-4 mb-3"></i>
+                                    <p>Start the conversation</p>
+                                </div>
+                            <% } %>
+                        </div>
+                    </div>
+                    
+                    <div class="card-footer bg-transparent">
+                        <form action="/messages/<%= conversation._id %>" method="POST" id="messageForm">
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="content" id="messageInput" 
+                                       placeholder="Type a message..." required autocomplete="off">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-send"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <%- include('../partials/footer') %>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        .sent-message {
+            background-color: #0a66c2;
+            color: white;
+        }
+        
+        .received-message {
+            background-color: white;
+            color: #1a1a2e;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .messages-container {
+            display: flex;
+            flex-direction: column;
+        }
+    </style>
+    <script>
+        const socket = io();
+        const userId = '<%= user._id %>';
+        const conversationId = '<%= conversation._id %>';
+        const currentUserPhoto = '<%= user.photo %>';
+        const messagesContainer = document.getElementById('messagesContainer');
+        const messageForm = document.getElementById('messageForm');
+        const messageInput = document.getElementById('messageInput');
+        
+        socket.emit('join', userId);
+        socket.emit('joinConversation', conversationId);
+        
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        
+        function appendMessage(message, isOwn) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'd-flex mb-3' + (isOwn ? ' justify-content-end' : ' justify-content-start');
+            msgDiv.style.alignItems = 'flex-end';
+            
+            const time = new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            if (isOwn) {
+                msgDiv.innerHTML = `
+                    <div class="sent-message rounded-3 p-2 flex-shrink-0" style="max-width: 70%;">
+                        <p class="mb-1" style="white-space: pre-wrap; word-wrap: break-word;">${message.content}</p>
+                        <small class="text-white-50" style="font-size: 0.75rem;">${time}</small>
+                    </div>
+                    <img src="${message.sender.photo}" alt="You" 
+                         class="rounded-circle ms-2 flex-shrink-0" width="32" height="32" style="object-fit: cover;">
+                `;
+            } else {
+                msgDiv.innerHTML = `
+                    <img src="${message.sender.photo}" alt="${message.sender.firstName}" 
+                         class="rounded-circle me-2 flex-shrink-0" width="32" height="32" style="object-fit: cover;">
+                    <div class="received-message rounded-3 p-2 flex-shrink-0" style="max-width: 70%;">
+                        <p class="mb-1" style="white-space: pre-wrap; word-wrap: break-word;">${message.content}</p>
+                        <small class="text-muted" style="font-size: 0.75rem;">${time}</small>
+                    </div>
+                `;
+            }
+            
+            messagesContainer.appendChild(msgDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        messageForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const content = messageInput.value.trim();
+            if (!content) return;
+            
+            fetch('/messages/<%= conversation._id %>', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({ content: content })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    appendMessage({
+                        content: content,
+                        sender: { photo: currentUserPhoto },
+                        createdAt: new Date()
+                    }, true);
+                    messageInput.value = '';
+                    messageInput.focus();
+                }
+            })
+            .catch(console.error);
+        });
+        
+        socket.on('newMessage', function(data) {
+            if (data.conversationId === conversationId && data.message.sender._id !== userId) {
+                appendMessage(data.message, false);
+            }
+        });
+    </script>
+</body>
+</html>

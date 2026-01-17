@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> | NetWorked</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <%- include('../partials/navbar') %>
+    
+    <main class="container py-4">
+        <%- include('../partials/messages') %>
+        
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="mb-0">Manage Education</h4>
+                    <a href="/profile" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to Profile
+                    </a>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header bg-transparent">
+                        <h5 class="mb-0">Add New Education</h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="/profile/education" method="POST">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="institution" class="form-label">Institution</label>
+                                    <input type="text" class="form-control" id="institution" name="institution" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="degree" class="form-label">Degree</label>
+                                    <input type="text" class="form-control" id="degree" name="degree" 
+                                           placeholder="e.g., Bachelor of Science" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-4 mb-3">
+                                    <label for="field" class="form-label">Field of Study</label>
+                                    <input type="text" class="form-control" id="field" name="field" 
+                                           placeholder="e.g., Computer Science">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="startDate" class="form-label">Start Date</label>
+                                    <input type="date" class="form-control" id="startDate" name="startDate">
+                                </div>
+                                <div class="col-md-4 mb-3">
+                                    <label for="endDate" class="form-label">End Date</label>
+                                    <input type="date" class="form-control" id="endDate" name="endDate">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description (optional)</label>
+                                <textarea class="form-control" id="description" name="description" rows="2" 
+                                          placeholder="Activities, achievements, etc."></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-plus-lg"></i> Add Education
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header bg-transparent">
+                        <h5 class="mb-0">Your Education</h5>
+                    </div>
+                    <div class="card-body">
+                        <% if (user.education && user.education.length > 0) { %>
+                            <% user.education.forEach(function(edu) { %>
+                                <div class="d-flex justify-content-between align-items-start border-bottom py-3">
+                                    <div>
+                                        <h6 class="mb-1"><%= edu.institution %></h6>
+                                        <p class="mb-1"><%= edu.degree %><%= edu.field ? ' - ' + edu.field : '' %></p>
+                                        <% if (edu.startDate) { %>
+                                            <p class="text-muted small mb-0">
+                                                <%= new Date(edu.startDate).getFullYear() %>
+                                                <% if (edu.endDate) { %>
+                                                    - <%= new Date(edu.endDate).getFullYear() %>
+                                                <% } %>
+                                            </p>
+                                        <% } %>
+                                        <% if (edu.description) { %>
+                                            <p class="small mt-2 mb-0"><%= edu.description %></p>
+                                        <% } %>
+                                    </div>
+                                    <form action="/profile/education/<%= edu._id %>?_method=DELETE" method="POST">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            <% }); %>
+                        <% } else { %>
+                            <p class="text-muted text-center mb-0">No education added yet.</p>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <%- include('../partials/footer') %>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

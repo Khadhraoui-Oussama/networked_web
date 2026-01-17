@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> | NetWorked</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light" data-user-id="<%= user ? user._id : '' %>">
+    <%- include('../partials/navbar') %>
+    
+    <main class="container py-4">
+        <%- include('../partials/messages') %>
+        
+        <div class="row">
+            <div class="col-lg-3 mb-4">
+                <div class="card">
+                    <div class="card-header bg-transparent">
+                        <h5 class="mb-0">My Network</h5>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <a href="/network/connections" class="list-group-item list-group-item-action d-flex justify-content-between">
+                            Connections
+                            <span class="badge bg-primary"><%= user.connections ? user.connections.length : 0 %></span>
+                        </a>
+                        <a href="/network/connections" class="list-group-item list-group-item-action d-flex justify-content-between">
+                            Pending Requests
+                            <span class="badge bg-warning text-dark"><%= user.pendingConnections ? user.pendingConnections.length : 0 %></span>
+                        </a>
+                        <a href="/network" class="list-group-item list-group-item-action d-flex justify-content-between">
+                            Following
+                            <span class="badge bg-secondary"><%= user.following ? user.following.length : 0 %></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-9">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <form action="/network" method="GET" class="row g-3">
+                            <div class="col-md-10">
+                                <input type="text" class="form-control" name="search" 
+                                       value="<%= typeof search !== 'undefined' ? search : '' %>" 
+                                       placeholder="Search by name, headline, skills...">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="submit" class="btn btn-primary w-100">Search</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <h5 class="mb-3">
+                    <% if (search) { %>
+                        Search Results
+                    <% } else { %>
+                        People You May Know
+                    <% } %>
+                </h5>
+                
+                <% if (users && users.length > 0) { %>
+                    <div class="row">
+                        <% users.forEach(function(person) { %>
+                            <div class="col-md-6 col-lg-4 mb-4">
+                                <div class="card h-100">
+                                    <div class="card-body text-center">
+                                        <img src="<%= person.photo %>" alt="<%= person.firstName %>" 
+                                             class="rounded-circle mb-3" width="80" height="80" style="object-fit: cover;">
+                                        <h6 class="mb-1">
+                                            <a href="/profile/<%= person._id %>" class="text-decoration-none">
+                                                <% if (person.role === 'company') { %>
+                                                    <%= person.companyName %>
+                                                <% } else { %>
+                                                    <%= person.firstName %> <%= person.lastName %>
+                                                <% } %>
+                                            </a>
+                                        </h6>
+                                        <p class="text-muted small mb-3">
+                                            <%= person.headline ? person.headline.substring(0, 50) + (person.headline.length > 50 ? '...' : '') : '' %>
+                                        </p>
+                                        
+                                        <% if (person.skills && person.skills.length > 0) { %>
+                                            <div class="mb-3">
+                                                <% person.skills.slice(0, 3).forEach(function(skill) { %>
+                                                    <span class="badge bg-light text-dark"><%= skill.technology %></span>
+                                                <% }); %>
+                                            </div>
+                                        <% } %>
+                                        
+                                        <% 
+                                            const isConnected = connections.some(c => c.toString() === person._id.toString());
+                                            const isPending = pendingConnections.some(p => p.toString() === person._id.toString());
+                                            const isFollowingPerson = following.some(f => f.toString() === person._id.toString());
+                                        %>
+                                        
+                                        <div class="d-grid gap-2">
+                                            <% if (isConnected) { %>
+                                                <span class="btn btn-outline-success btn-sm disabled">
+                                                    <i class="bi bi-check"></i> Connected
+                                                </span>
+                                            <% } else { %>
+                                                <form action="/network/connect/<%= person._id %>" method="POST">
+                                                    <button type="submit" class="btn btn-primary btn-sm w-100">
+                                                        <i class="bi bi-person-plus"></i> Connect
+                                                    </button>
+                                                </form>
+                                            <% } %>
+                                            
+                                            <% if (isFollowingPerson) { %>
+                                                <form action="/network/unfollow/<%= person._id %>" method="POST">
+                                                    <button type="submit" class="btn btn-outline-secondary btn-sm w-100">
+                                                        Following
+                                                    </button>
+                                                </form>
+                                            <% } else { %>
+                                                <form action="/network/follow/<%= person._id %>" method="POST">
+                                                    <button type="submit" class="btn btn-outline-primary btn-sm w-100">
+                                                        <i class="bi bi-plus"></i> Follow
+                                                    </button>
+                                                </form>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                <% } else { %>
+                    <div class="card">
+                        <div class="card-body text-center py-5">
+                            <i class="bi bi-people display-4 text-muted mb-3"></i>
+                            <h5>No users found</h5>
+                            <p class="text-muted">Try a different search term.</p>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </main>
+    
+    <%- include('../partials/footer') %>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> | NetWorked Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <%- include('../partials/navbar') %>
+    
+    <main class="container py-4">
+        <%- include('../partials/messages') %>
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3>Admin Dashboard</h3>
+        </div>
+        
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h2 class="mb-0"><%= stats.totalUsers %></h2>
+                                <p class="mb-0">Total Users</p>
+                            </div>
+                            <i class="bi bi-people display-4 opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-0">
+                        <a href="/admin/users" class="text-white text-decoration-none small">
+                            View all <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h2 class="mb-0"><%= stats.totalPosts %></h2>
+                                <p class="mb-0">Total Posts</p>
+                            </div>
+                            <i class="bi bi-file-post display-4 opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-0">
+                        <a href="/admin/posts" class="text-white text-decoration-none small">
+                            View all <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h2 class="mb-0"><%= stats.totalJobs %></h2>
+                                <p class="mb-0">Job Listings</p>
+                            </div>
+                            <i class="bi bi-briefcase display-4 opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-0">
+                        <a href="/jobs" class="text-white text-decoration-none small">
+                            View all <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-3 mb-3">
+                <div class="card bg-warning text-dark">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h2 class="mb-0"><%= stats.bannedUsers %></h2>
+                                <p class="mb-0">Banned Users</p>
+                            </div>
+                            <i class="bi bi-person-x display-4 opacity-50"></i>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-transparent border-0">
+                        <a href="/admin/users?filter=banned" class="text-dark text-decoration-none small">
+                            View all <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header bg-transparent">
+                        <h5 class="mb-0">Recent Users</h5>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <% if (recentUsers && recentUsers.length > 0) { %>
+                            <% recentUsers.forEach(function(u) { %>
+                                <div class="list-group-item d-flex align-items-center">
+                                    <img src="<%= u.photo %>" alt="<%= u.firstName %>" 
+                                         class="rounded-circle me-3" width="40" height="40" style="object-fit: cover;">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-0">
+                                            <% if (u.role === 'company') { %>
+                                                <%= u.companyName %>
+                                            <% } else { %>
+                                                <%= u.firstName %> <%= u.lastName %>
+                                            <% } %>
+                                        </h6>
+                                        <small class="text-muted"><%= u.email %></small>
+                                    </div>
+                                    <span class="badge bg-<%= u.role === 'admin' ? 'danger' : (u.role === 'company' ? 'info' : 'primary') %>">
+                                        <%= u.role %>
+                                    </span>
+                                </div>
+                            <% }); %>
+                        <% } else { %>
+                            <div class="list-group-item text-center text-muted py-4">
+                                No users yet
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header bg-transparent">
+                        <h5 class="mb-0">Recent Posts</h5>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <% if (recentPosts && recentPosts.length > 0) { %>
+                            <% recentPosts.forEach(function(p) { %>
+                                <div class="list-group-item">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <img src="<%= p.author.photo %>" alt="<%= p.author.firstName %>" 
+                                             class="rounded-circle me-2" width="32" height="32" style="object-fit: cover;">
+                                        <small class="text-muted">
+                                            <%= p.author.firstName %> <%= p.author.lastName %>
+                                        </small>
+                                    </div>
+                                    <p class="mb-1 text-truncate"><%= p.content %></p>
+                                    <small class="text-muted">
+                                        <%= new Date(p.createdAt).toLocaleDateString() %>
+                                    </small>
+                                </div>
+                            <% }); %>
+                        <% } else { %>
+                            <div class="list-group-item text-center text-muted py-4">
+                                No posts yet
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <%- include('../partials/footer') %>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+</html>

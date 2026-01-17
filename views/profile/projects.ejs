@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> | NetWorked</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <%- include('../partials/navbar') %>
+    
+    <main class="container py-4">
+        <%- include('../partials/messages') %>
+        
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h4 class="mb-0">Manage Projects</h4>
+                    <a href="/profile" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left"></i> Back to Profile
+                    </a>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header bg-transparent">
+                        <h5 class="mb-0">Add New Project</h5>
+                    </div>
+                    <div class="card-body">
+                        <form action="/profile/projects" method="POST">
+                            <div class="mb-3">
+                                <label for="title" class="form-label">Project Title</label>
+                                <input type="text" class="form-control" id="title" name="title" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="description" class="form-label">Description</label>
+                                <textarea class="form-control" id="description" name="description" rows="3" 
+                                          placeholder="Describe the project, your role, and outcomes..."></textarea>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="technologies" class="form-label">Technologies Used</label>
+                                    <input type="text" class="form-control" id="technologies" name="technologies" 
+                                           placeholder="e.g., React, Node.js, MongoDB (comma separated)">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="link" class="form-label">Project Link</label>
+                                    <input type="url" class="form-control" id="link" name="link" 
+                                           placeholder="https://">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="startDate" class="form-label">Start Date</label>
+                                    <input type="date" class="form-control" id="startDate" name="startDate">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="endDate" class="form-label">End Date</label>
+                                    <input type="date" class="form-control" id="endDate" name="endDate">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-plus-lg"></i> Add Project
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header bg-transparent">
+                        <h5 class="mb-0">Your Projects</h5>
+                    </div>
+                    <div class="card-body">
+                        <% if (user.projects && user.projects.length > 0) { %>
+                            <% user.projects.forEach(function(proj) { %>
+                                <div class="d-flex justify-content-between align-items-start border-bottom py-3">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1"><%= proj.title %></h6>
+                                        <% if (proj.description) { %>
+                                            <p class="small mb-2"><%= proj.description %></p>
+                                        <% } %>
+                                        <% if (proj.technologies && proj.technologies.length > 0) { %>
+                                            <div class="mb-2">
+                                                <% proj.technologies.forEach(function(tech) { %>
+                                                    <span class="badge bg-secondary me-1"><%= tech %></span>
+                                                <% }); %>
+                                            </div>
+                                        <% } %>
+                                        <% if (proj.link) { %>
+                                            <a href="<%= proj.link %>" target="_blank" class="small">
+                                                <i class="bi bi-link-45deg"></i> View Project
+                                            </a>
+                                        <% } %>
+                                    </div>
+                                    <form action="/profile/projects/<%= proj._id %>?_method=DELETE" method="POST">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm">
+                                            <i class="bi bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            <% }); %>
+                        <% } else { %>
+                            <p class="text-muted text-center mb-0">No projects added yet.</p>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <%- include('../partials/footer') %>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

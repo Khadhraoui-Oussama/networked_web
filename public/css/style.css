@@ -1,0 +1,265 @@
+:root {
+    --primary-color: #0a66c2;
+    --secondary-color: #5e6ad2;
+    --dark-color: #1a1a2e;
+    --light-color: #f3f2ef;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background-color: var(--light-color);
+}
+
+.navbar-brand {
+    font-weight: 700;
+    font-size: 1.5rem;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.08), 0 4px 6px rgba(0,0,0,0.04);
+    border-radius: 8px;
+}
+
+.card-header {
+    background-color: transparent;
+    border-bottom: 1px solid rgba(0,0,0,0.08);
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #004182;
+    border-color: #004182;
+}
+
+.btn-outline-primary {
+    color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(10, 102, 194, 0.25);
+}
+
+.profile-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    height: 150px;
+    border-radius: 8px 8px 0 0;
+}
+
+.profile-photo {
+    width: 120px;
+    height: 120px;
+    border: 4px solid #fff;
+    margin-top: -60px;
+    object-fit: cover;
+}
+
+.skill-badge {
+    display: inline-block;
+    padding: 0.35rem 0.75rem;
+    margin: 0.25rem;
+    background-color: #e9ecef;
+    border-radius: 20px;
+    font-size: 0.875rem;
+}
+
+.skill-level {
+    height: 6px;
+    background-color: #e9ecef;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.skill-level-fill {
+    height: 100%;
+    background-color: var(--primary-color);
+    border-radius: 3px;
+}
+
+.post-card {
+    transition: box-shadow 0.2s ease;
+}
+
+.post-card:hover {
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.12), 0 6px 12px rgba(0,0,0,0.08);
+}
+
+.reaction-btn {
+    border: none;
+    background: none;
+    color: #666;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.reaction-btn:hover {
+    background-color: rgba(10, 102, 194, 0.1);
+    color: var(--primary-color);
+}
+
+.reaction-btn.active {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.messages-container::-webkit-scrollbar {
+    width: 6px;
+}
+
+.messages-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.messages-container::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 3px;
+}
+
+.notification-badge {
+    position: absolute;
+    top: 2px;
+    right: 0;
+    font-size: 0.6rem;
+    padding: 0.15rem 0.35rem;
+    min-width: 16px;
+    text-align: center;
+}
+
+.nav-link.position-relative {
+    padding-right: 1rem;
+}
+
+.job-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.job-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.welcome-hero {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+}
+
+.footer {
+    background-color: #fff;
+    border-top: 1px solid rgba(0,0,0,0.08);
+    padding: 1.5rem 0;
+    margin-top: auto;
+}
+
+@media (max-width: 768px) {
+    .profile-photo {
+        width: 80px;
+        height: 80px;
+        margin-top: -40px;
+    }
+    
+    .profile-header {
+        height: 100px;
+    }
+    
+    .navbar-nav {
+        padding: 1rem 0;
+    }
+}
+
+.experience-item,
+.education-item,
+.project-item {
+    position: relative;
+    padding-left: 20px;
+    border-left: 2px solid var(--primary-color);
+}
+
+.experience-item::before,
+.education-item::before,
+.project-item::before {
+    content: '';
+    position: absolute;
+    left: -6px;
+    top: 0;
+    width: 10px;
+    height: 10px;
+    background: var(--primary-color);
+    border-radius: 50%;
+}
+
+.video-container {
+    position: relative;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+}
+
+.video-container video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.badge-online {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 12px;
+    height: 12px;
+    background-color: #28a745;
+    border: 2px solid #fff;
+    border-radius: 50%;
+}
+
+.list-group-item-action:hover {
+    background-color: rgba(10, 102, 194, 0.05);
+}
+
+.modal-content {
+    border: none;
+    border-radius: 12px;
+}
+
+.form-label.required::after {
+    content: ' *';
+    color: #dc3545;
+}
+
+.table > :not(caption) > * > * {
+    padding: 1rem;
+}
+
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    border-radius: 8px;
+}
+
+.alert {
+    border: none;
+    border-radius: 8px;
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+}

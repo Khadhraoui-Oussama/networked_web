@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> | NetWorked</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <%- include('../partials/navbar') %>
+    
+    <main class="container py-4">
+        <%- include('../partials/messages') %>
+        
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="mb-0">My Job Listings</h4>
+            <a href="/jobs/create" class="btn btn-primary">
+                <i class="bi bi-plus-lg"></i> Post New Job
+            </a>
+        </div>
+        
+        <% if (jobs && jobs.length > 0) { %>
+            <% jobs.forEach(function(job) { %>
+                <div class="card mb-4">
+                    <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="mb-0">
+                                <a href="/jobs/<%= job._id %>" class="text-decoration-none"><%= job.title %></a>
+                            </h5>
+                            <small class="text-muted">
+                                Posted <%= new Date(job.createdAt).toLocaleDateString() %>
+                                <% if (!job.isActive) { %>
+                                    <span class="badge bg-secondary ms-2">Closed</span>
+                                <% } %>
+                            </small>
+                        </div>
+                        <div>
+                            <span class="badge bg-primary fs-6">
+                                <%= job.applications ? job.applications.length : 0 %> Applications
+                            </span>
+                            <% if (job.isActive) { %>
+                                <form action="/jobs/<%= job._id %>?_method=DELETE" method="POST" class="d-inline ms-2">
+                                    <button type="submit" class="btn btn-outline-danger btn-sm" 
+                                            onclick="return confirm('Close this job listing?')">
+                                        Close
+                                    </button>
+                                </form>
+                            <% } %>
+                        </div>
+                    </div>
+                    
+                    <% if (job.applications && job.applications.length > 0) { %>
+                        <div class="card-body">
+                            <h6 class="mb-3">Applicants</h6>
+                            <div class="table-responsive">
+                                <table class="table table-hover mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>Applicant</th>
+                                            <th>Applied</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <% job.applications.forEach(function(app) { %>
+                                            <tr>
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <img src="<%= app.applicant.photo %>" alt="<%= app.applicant.firstName %>" 
+                                                             class="rounded-circle me-2" width="40" height="40" style="object-fit: cover;">
+                                                        <div>
+                                                            <a href="/profile/<%= app.applicant._id %>" class="text-decoration-none">
+                                                                <%= app.applicant.firstName %> <%= app.applicant.lastName %>
+                                                            </a>
+                                                            <% if (app.applicant.headline) { %>
+                                                                <br><small class="text-muted"><%= app.applicant.headline %></small>
+                                                            <% } %>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td><%= new Date(app.appliedAt).toLocaleDateString() %></td>
+                                                <td>
+                                                    <% if (app.status === 'pending') { %>
+                                                        <span class="badge bg-warning text-dark">Pending</span>
+                                                    <% } else if (app.status === 'reviewed') { %>
+                                                        <span class="badge bg-info">Reviewed</span>
+                                                    <% } else if (app.status === 'accepted') { %>
+                                                        <span class="badge bg-success">Accepted</span>
+                                                    <% } else { %>
+                                                        <span class="badge bg-danger">Rejected</span>
+                                                    <% } %>
+                                                </td>
+                                                <td>
+                                                    <div class="btn-group btn-group-sm">
+                                                        <a href="/profile/<%= app.applicant._id %>" class="btn btn-outline-primary">
+                                                            View Profile
+                                                        </a>
+                                                        <button type="button" class="btn btn-outline-secondary dropdown-toggle dropdown-toggle-split" 
+                                                                data-bs-toggle="dropdown">
+                                                        </button>
+                                                        <ul class="dropdown-menu">
+                                                            <li>
+                                                                <form action="/jobs/<%= job._id %>/application/<%= app.applicant._id %>?_method=PUT" method="POST">
+                                                                    <input type="hidden" name="status" value="reviewed">
+                                                                    <button type="submit" class="dropdown-item">Mark as Reviewed</button>
+                                                                </form>
+                                                            </li>
+                                                            <li>
+                                                                <form action="/jobs/<%= job._id %>/application/<%= app.applicant._id %>?_method=PUT" method="POST">
+                                                                    <input type="hidden" name="status" value="accepted">
+                                                                    <button type="submit" class="dropdown-item text-success">Accept</button>
+                                                                </form>
+                                                            </li>
+                                                            <li>
+                                                                <form action="/jobs/<%= job._id %>/application/<%= app.applicant._id %>?_method=PUT" method="POST">
+                                                                    <input type="hidden" name="status" value="rejected">
+                                                                    <button type="submit" class="dropdown-item text-danger">Reject</button>
+                                                                </form>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        <% }); %>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    <% } else { %>
+                        <div class="card-body text-center text-muted">
+                            <p class="mb-0">No applications yet</p>
+                        </div>
+                    <% } %>
+                </div>
+            <% }); %>
+        <% } else { %>
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-briefcase display-4 text-muted mb-3"></i>
+                    <h5>No job listings yet</h5>
+                    <p class="text-muted">Start by posting your first job to find great candidates.</p>
+                    <a href="/jobs/create" class="btn btn-primary">
+                        <i class="bi bi-plus-lg"></i> Post a Job
+                    </a>
+                </div>
+            </div>
+        <% } %>
+    </main>
+    
+    <%- include('../partials/footer') %>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+</html>

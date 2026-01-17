@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %> | NetWorked</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light" data-user-id="<%= user ? user._id : '' %>">
+    <%- include('../partials/navbar') %>
+    
+    <main class="container py-4">
+        <%- include('../partials/messages') %>
+        
+        <div class="row">
+            <div class="col-lg-8 mx-auto">
+                <div class="card mb-4">
+                    <div class="card-body position-relative">
+                        <div class="bg-primary" style="height: 120px; margin: -1rem -1rem 0; border-radius: 0.375rem 0.375rem 0 0;"></div>
+                        
+                        <div class="d-flex flex-column flex-md-row align-items-center align-items-md-end" style="margin-top: -60px;">
+                            <img src="<%= profileUser.photo %>" alt="<%= profileUser.firstName %>" 
+                                 class="rounded-circle border border-4 border-white shadow" 
+                                 width="150" height="150" style="object-fit: cover;">
+                            
+                            <div class="ms-md-4 mt-3 mt-md-0 text-center text-md-start flex-grow-1">
+                                <h2 class="mb-0">
+                                    <% if (profileUser.role === 'company') { %>
+                                        <%= profileUser.companyName %>
+                                    <% } else { %>
+                                        <%= profileUser.firstName %> <%= profileUser.lastName %>
+                                    <% } %>
+                                </h2>
+                                <% if (profileUser.headline) { %>
+                                    <p class="text-muted mb-1"><%= profileUser.headline %></p>
+                                <% } %>
+                                <p class="text-muted small mb-0">
+                                    <% if (profileUser.city || profileUser.country) { %>
+                                        <i class="bi bi-geo-alt"></i> 
+                                        <%= profileUser.city %><%= profileUser.city && profileUser.country ? ', ' : '' %><%= profileUser.country %>
+                                    <% } %>
+                                    <% if (profileUser.connections) { %>
+                                        <span class="ms-3">
+                                            <i class="bi bi-people"></i> <%= profileUser.connections.length %> connections
+                                        </span>
+                                    <% } %>
+                                </p>
+                            </div>
+                            
+                            <div class="mt-3 mt-md-0">
+                                <% if (isOwner) { %>
+                                    <a href="/profile/edit" class="btn btn-outline-primary">
+                                        <i class="bi bi-pencil"></i> Edit Profile
+                                    </a>
+                                    <a href="/profile/cv/download" class="btn btn-primary">
+                                        <i class="bi bi-file-earmark-pdf"></i> Download CV
+                                    </a>
+                                <% } else { %>
+                                    <% if (typeof isConnected !== 'undefined' && isConnected) { %>
+                                        <form action="/messages/start/<%= profileUser._id %>" method="POST" class="d-inline">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="bi bi-chat"></i> Message
+                                            </button>
+                                        </form>
+                                    <% } else if (typeof pendingRequest !== 'undefined' && pendingRequest) { %>
+                                        <button class="btn btn-secondary" disabled>Request Sent</button>
+                                    <% } else { %>
+                                        <form action="/network/connect/<%= profileUser._id %>" method="POST" class="d-inline">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="bi bi-person-plus"></i> Connect
+                                            </button>
+                                        </form>
+                                    <% } %>
+                                    
+                                    <% if (typeof isFollowing !== 'undefined') { %>
+                                        <% if (isFollowing) { %>
+                                            <form action="/network/unfollow/<%= profileUser._id %>" method="POST" class="d-inline">
+                                                <button type="submit" class="btn btn-outline-secondary">Following</button>
+                                            </form>
+                                        <% } else { %>
+                                            <form action="/network/follow/<%= profileUser._id %>" method="POST" class="d-inline">
+                                                <button type="submit" class="btn btn-outline-primary">Follow</button>
+                                            </form>
+                                        <% } %>
+                                    <% } %>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <% if (profileUser.bio || (isOwner && profileUser.role !== 'company')) { %>
+                    <div class="card mb-4">
+                        <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">About</h5>
+                            <% if (isOwner) { %>
+                                <a href="/profile/edit" class="btn btn-sm btn-outline-secondary">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                            <% } %>
+                        </div>
+                        <div class="card-body">
+                            <% if (profileUser.bio) { %>
+                                <p class="mb-0"><%= profileUser.bio %></p>
+                            <% } else { %>
+                                <p class="text-muted mb-0">Add a summary about yourself.</p>
+                            <% } %>
+                        </div>
+                    </div>
+                <% } %>
+                
+                <% if (profileUser.role === 'company' && profileUser.companyDescription) { %>
+                    <div class="card mb-4">
+                        <div class="card-header bg-transparent">
+                            <h5 class="mb-0">About Company</h5>
+                        </div>
+                        <div class="card-body">
+                            <p><%= profileUser.companyDescription %></p>
+                            <% if (profileUser.industry) { %>
+                                <p class="mb-1"><strong>Industry:</strong> <%= profileUser.industry %></p>
+                            <% } %>
+                            <% if (profileUser.companySize) { %>
+                                <p class="mb-0"><strong>Company Size:</strong> <%= profileUser.companySize %></p>
+                            <% } %>
+                        </div>
+                    </div>
+                <% } %>
+                
+                <% if (profileUser.cvVideo) { %>
+                    <div class="card mb-4">
+                        <div class="card-header bg-transparent">
+                            <h5 class="mb-0">CV Video</h5>
+                        </div>
+                        <div class="card-body">
+                            <video controls class="w-100 rounded" style="max-height: 400px;">
+                                <source src="<%= profileUser.cvVideo %>" type="video/mp4">
+                                Your browser does not support the video tag.
+                            </video>
+                        </div>
+                    </div>
+                <% } %>
+                
+                <div class="card mb-4">
+                    <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Experience</h5>
+                        <% if (isOwner) { %>
+                            <a href="/profile/experience" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-plus-lg"></i>
+                            </a>
+                        <% } %>
+                    </div>
+                    <div class="card-body">
+                        <% if (profileUser.experiences && profileUser.experiences.length > 0) { %>
+                            <% profileUser.experiences.forEach(function(exp, index) { %>
+                                <div class="d-flex <%= index > 0 ? 'mt-4 pt-4 border-top' : '' %>">
+                                    <div class="bg-light rounded p-2 me-3">
+                                        <i class="bi bi-briefcase fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0"><%= exp.position %></h6>
+                                        <p class="mb-1"><%= exp.company %></p>
+                                        <p class="text-muted small mb-1">
+                                            <%= new Date(exp.startDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) %>
+                                            - 
+                                            <%= exp.current ? 'Present' : new Date(exp.endDate).toLocaleDateString('en-US', { month: 'short', year: 'numeric' }) %>
+                                            <% if (exp.type) { %> | <%= exp.type %><% } %>
+                                        </p>
+                                        <% if (exp.description) { %>
+                                            <p class="small mb-1"><%= exp.description %></p>
+                                        <% } %>
+                                        <% if (exp.technologies && exp.technologies.length > 0) { %>
+                                            <div>
+                                                <% exp.technologies.forEach(function(tech) { %>
+                                                    <span class="badge bg-light text-dark me-1"><%= tech %></span>
+                                                <% }); %>
+                                            </div>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        <% } else { %>
+                            <p class="text-muted mb-0">
+                                <% if (isOwner) { %>
+                                    Add your work experience to stand out to recruiters.
+                                <% } else { %>
+                                    No experience listed.
+                                <% } %>
+                            </p>
+                        <% } %>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Education</h5>
+                        <% if (isOwner) { %>
+                            <a href="/profile/education" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-plus-lg"></i>
+                            </a>
+                        <% } %>
+                    </div>
+                    <div class="card-body">
+                        <% if (profileUser.education && profileUser.education.length > 0) { %>
+                            <% profileUser.education.forEach(function(edu, index) { %>
+                                <div class="d-flex <%= index > 0 ? 'mt-4 pt-4 border-top' : '' %>">
+                                    <div class="bg-light rounded p-2 me-3">
+                                        <i class="bi bi-mortarboard fs-4"></i>
+                                    </div>
+                                    <div>
+                                        <h6 class="mb-0"><%= edu.institution %></h6>
+                                        <p class="mb-1"><%= edu.degree %><%= edu.field ? ' - ' + edu.field : '' %></p>
+                                        <% if (edu.startDate) { %>
+                                            <p class="text-muted small mb-0">
+                                                <%= new Date(edu.startDate).toLocaleDateString('en-US', { year: 'numeric' }) %>
+                                                <% if (edu.endDate) { %>
+                                                    - <%= new Date(edu.endDate).toLocaleDateString('en-US', { year: 'numeric' }) %>
+                                                <% } %>
+                                            </p>
+                                        <% } %>
+                                    </div>
+                                </div>
+                            <% }); %>
+                        <% } else { %>
+                            <p class="text-muted mb-0">
+                                <% if (isOwner) { %>
+                                    Add your education background.
+                                <% } else { %>
+                                    No education listed.
+                                <% } %>
+                            </p>
+                        <% } %>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Skills</h5>
+                        <% if (isOwner) { %>
+                            <a href="/profile/skills" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-plus-lg"></i>
+                            </a>
+                        <% } %>
+                    </div>
+                    <div class="card-body">
+                        <% if (profileUser.skills && profileUser.skills.length > 0) { %>
+                            <div class="row">
+                                <% profileUser.skills.forEach(function(skill) { %>
+                                    <div class="col-md-6 mb-3">
+                                        <div class="border rounded p-3">
+                                            <h6 class="mb-1"><%= skill.title %></h6>
+                                            <p class="small text-muted mb-1"><%= skill.technology %></p>
+                                            <span class="badge bg-primary"><%= skill.level %></span>
+                                            <% if (skill.description) { %>
+                                                <p class="small mt-2 mb-0"><%= skill.description %></p>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                <% }); %>
+                            </div>
+                        <% } else { %>
+                            <p class="text-muted mb-0">
+                                <% if (isOwner) { %>
+                                    Add your skills to showcase your expertise.
+                                <% } else { %>
+                                    No skills listed.
+                                <% } %>
+                            </p>
+                        <% } %>
+                    </div>
+                </div>
+                
+                <div class="card mb-4">
+                    <div class="card-header bg-transparent d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Projects</h5>
+                        <% if (isOwner) { %>
+                            <a href="/profile/projects" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-plus-lg"></i>
+                            </a>
+                        <% } %>
+                    </div>
+                    <div class="card-body">
+                        <% if (profileUser.projects && profileUser.projects.length > 0) { %>
+                            <% profileUser.projects.forEach(function(proj, index) { %>
+                                <div class="<%= index > 0 ? 'mt-4 pt-4 border-top' : '' %>">
+                                    <h6 class="mb-1"><%= proj.title %></h6>
+                                    <% if (proj.description) { %>
+                                        <p class="small mb-2"><%= proj.description %></p>
+                                    <% } %>
+                                    <% if (proj.technologies && proj.technologies.length > 0) { %>
+                                        <div class="mb-2">
+                                            <% proj.technologies.forEach(function(tech) { %>
+                                                <span class="badge bg-secondary me-1"><%= tech %></span>
+                                            <% }); %>
+                                        </div>
+                                    <% } %>
+                                    <% if (proj.link) { %>
+                                        <a href="<%= proj.link %>" target="_blank" class="small">
+                                            <i class="bi bi-link-45deg"></i> View Project
+                                        </a>
+                                    <% } %>
+                                </div>
+                            <% }); %>
+                        <% } else { %>
+                            <p class="text-muted mb-0">
+                                <% if (isOwner) { %>
+                                    Showcase your projects to demonstrate your work.
+                                <% } else { %>
+                                    No projects listed.
+                                <% } %>
+                            </p>
+                        <% } %>
+                    </div>
+                </div>
+                
+                <% if (profileUser.website || profileUser.linkedin || profileUser.github) { %>
+                    <div class="card mb-4">
+                        <div class="card-header bg-transparent">
+                            <h5 class="mb-0">Links</h5>
+                        </div>
+                        <div class="card-body">
+                            <% if (profileUser.website) { %>
+                                <a href="<%= profileUser.website %>" target="_blank" class="btn btn-outline-secondary btn-sm me-2 mb-2">
+                                    <i class="bi bi-globe"></i> Website
+                                </a>
+                            <% } %>
+                            <% if (profileUser.linkedin) { %>
+                                <a href="<%= profileUser.linkedin %>" target="_blank" class="btn btn-outline-secondary btn-sm me-2 mb-2">
+                                    <i class="bi bi-linkedin"></i> LinkedIn
+                                </a>
+                            <% } %>
+                            <% if (profileUser.github) { %>
+                                <a href="<%= profileUser.github %>" target="_blank" class="btn btn-outline-secondary btn-sm mb-2">
+                                    <i class="bi bi-github"></i> GitHub
+                                </a>
+                            <% } %>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </main>
+    
+    <%- include('../partials/footer') %>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/js/main.js"></script>
+</body>
+</html>

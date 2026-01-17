@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register | NetWorked</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/style.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="/welcome">
+                <i class="bi bi-globe2"></i> NetWorked
+            </a>
+        </div>
+    </nav>
+    
+    <main class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-body p-4">
+                        <h2 class="text-center mb-4">Join NetWorked</h2>
+                        
+                        <%- include('../partials/messages') %>
+                        
+                        <form action="/auth/register" method="POST" enctype="multipart/form-data">
+                            <div class="mb-3">
+                                <label class="form-label">Account Type</label>
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="role" id="roleUser" value="user" checked>
+                                    <label class="btn btn-outline-primary" for="roleUser">
+                                        <i class="bi bi-person me-1"></i> Professional
+                                    </label>
+                                    
+                                    <input type="radio" class="btn-check" name="role" id="roleCompany" value="company">
+                                    <label class="btn btn-outline-primary" for="roleCompany">
+                                        <i class="bi bi-building me-1"></i> Company
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="firstName" class="form-label">First Name</label>
+                                    <input type="text" class="form-control" id="firstName" name="firstName" 
+                                           value="<%= typeof firstName !== 'undefined' ? firstName : '' %>" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="lastName" class="form-label">Last Name</label>
+                                    <input type="text" class="form-control" id="lastName" name="lastName" 
+                                           value="<%= typeof lastName !== 'undefined' ? lastName : '' %>" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3 company-field" style="display: none;">
+                                <label for="companyName" class="form-label">Company Name</label>
+                                <input type="text" class="form-control" id="companyName" name="companyName"
+                                       value="<%= typeof companyName !== 'undefined' ? companyName : '' %>">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email" 
+                                       value="<%= typeof email !== 'undefined' ? email : '' %>" required>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="password" class="form-label">Password</label>
+                                    <input type="password" class="form-control" id="password" name="password" 
+                                           minlength="6" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="password2" class="form-label">Confirm Password</label>
+                                    <input type="password" class="form-control" id="password2" name="password2" 
+                                           minlength="6" required>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="photo" class="form-label">Profile Photo (optional)</label>
+                                <input type="file" class="form-control" id="photo" name="photo" accept="image/*">
+                            </div>
+                            
+                            <div class="form-check mb-3">
+                                <input type="checkbox" class="form-check-input" id="terms" required>
+                                <label class="form-check-label" for="terms">
+                                    I agree to the <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>
+                                </label>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary btn-lg">Join Now</button>
+                            </div>
+                        </form>
+                        
+                        <hr class="my-4">
+                        
+                        <p class="text-center mb-0">
+                            Already on NetWorked? <a href="/auth/login">Sign in</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.querySelectorAll('input[name="role"]').forEach(function(radio) {
+            radio.addEventListener('change', function() {
+                const companyField = document.querySelector('.company-field');
+                if (this.value === 'company') {
+                    companyField.style.display = 'block';
+                    document.getElementById('companyName').required = true;
+                } else {
+                    companyField.style.display = 'none';
+                    document.getElementById('companyName').required = false;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
