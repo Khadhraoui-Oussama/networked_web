@@ -184,7 +184,3 @@ db.users.updateOne({ email: "admin@example.com" }, { $set: { role: "admin" } })
 - GET /messages - List conversations
 - GET /messages/:id - View conversation
 - POST /messages/:id - Send message
-
-## License
-
-ISC
